@@ -1,17 +1,33 @@
 #!/bin/bash
 
-set -e
+set -ex
 
-if [ -d ./src ]
+if [ -z "$GIT_REPO" ]
 then
-  rm -rf ./src
+  echo "GIT_REPO missing"
+  exit 1
 fi
 
-git clone ./grafana-5.2.3-displayx ./src
+if [ -z "$GIT_BRANCH" ]
+then
+  echo "GIT_BRANCH missing"
+  exit 1
+fi
 
-docker run \
-  -e HTTP_PROXY="http://192.168.50.159:1087" \
-  -e HTTPS_PROXY="http://192.168.50.159:1087" \
+_HTTP_PROXY=$HTTP_PROXY
+[ -z "$HTTP_PROXY" ] && _HTTP_PROXY=$http_proxy
+
+_HTTPS_PROXY=$HTTPS_PROXY
+[ -z "$HTTPS_PROXY" ] && _HTTPS_PROXY=$https_proxy
+
+_NO_PROXY=$NO_PROXY
+[ -z "$NO_PROXY" ] && _NO_PROXY=$no_proxy
+
+docker run -it \
+  -e GIT_REPO=$GIT_REPO \
+  -e GIT_BRANCH=$GIT_BRANCH \
+  ${_HTTP_PROXY:+ -e HTTP_PROXY="$_HTTP_PROXY"} \
+  ${_HTTPS_PROXY:+ -e HTTPS_PROXY="$_HTTPS_PROXY"} \
+  ${_NO_PROXY:+ -e NO_PROXY="$_NO_PROXY"} \
   -v `pwd`/dist:/dist \
-  -v `pwd`/src:/src \
   building-grafana:latest

@@ -2,9 +2,15 @@
 
 set -ex
 
+git clone $GIT_REPO /tmp/grafana
+
+cd /tmp/grafana
+
+git checkout $GIT_BRANCH
+
 mkdir -p $GOPATH/src/github.com/grafana
 
-ln -s /src $GOPATH/src/github.com/grafana/grafana
+ln -s /tmp/grafana $GOPATH/src/github.com/grafana/grafana
 
 cd $GOPATH/src/github.com/grafana/grafana
 
